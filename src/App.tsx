@@ -1,10 +1,10 @@
 import './App.css'
 import { useTodoStore } from './model/todoStore.ts';
-import { Card, Checkbox, Input } from "antd";
+import { Card, Checkbox, Input, Button } from "antd";
 import { useState } from "react";
 
 function App() {
-  const { todos, addTodo, markAsCompleted } = useTodoStore();
+  const { todos, addTodo, markAsCompleted, resetTodos } = useTodoStore();
   const [value, setValue] = useState('');
 
   return (
@@ -29,6 +29,7 @@ function App() {
           <span style={{paddingLeft: '8px'}}>{todo.title}</span>
         </Card>
       ))}
+      <Button type={'primary'} onClick={resetTodos}>reset</Button>
     </div>
   )
 }
