@@ -1,35 +1,31 @@
-import './App.css'
-import { useTodoStore } from './model/todoStore.ts';
-import { Card, Checkbox, Input, Button } from "antd";
-import { useState } from "react";
+import './App.css';
+import { Button, Card, Rate, Tag } from 'antd';
+import { ShoppingCartOutlined } from '@ant-design/icons';
+import { useCoffeeList } from './model/coffeeStore.ts';
+import { useShallow } from 'zustand/react/shallow';
+import { useEffect } from 'react';
 
 function App() {
-  const { todos, addTodo, markAsCompleted, resetTodos } = useTodoStore();
-  const [value, setValue] = useState('');
+  const [coffeeList, getCoffeeList] = useCoffeeList(useShallow(state => [state.coffeeList, state.getCoffeeList]))
+
+  useEffect(() => {
+    getCoffeeList();
+  }, []);
 
   return (
     <div className="wrapper">
-      <Input
-        style={{ width: 300 }}
-        onChange={(e) => setValue(e.target.value)}
-        value={value}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            addTodo(value);
-            setValue("");
-          }
-        }}
-      />
-      {todos.map((todo, index) => (
-        <Card className="card" key={todo.title}>
-          <Checkbox
-            checked={todo.isComplete}
-            onChange={() => markAsCompleted(index)}
-          />
-          <span style={{paddingLeft: '8px'}}>{todo.title}</span>
-        </Card>
-      ))}
-      <Button type={'primary'} onClick={resetTodos}>reset</Button>
+      <div className="cardsContainer">
+        {coffeeList && coffeeList.map((coffee) => (
+          <Card
+            key={coffee.id}
+            cover={<img src={coffee.image} alt={coffee.name} />}
+            actions={[<Button icon={<ShoppingCartOutlined />}>{coffee.price}</Button>]}>
+            <Card.Meta title={coffee.name} description={coffee.subTitle}></Card.Meta>
+            <Tag color="purple" style={{marginTop: '12px'}}>{coffee.type}</Tag>
+            <Rate defaultValue={coffee.rating} disabled allowHalf style={{marginTop: '12px'}}></Rate>
+          </Card>
+        ))}
+      </div>
     </div>
   )
 }
