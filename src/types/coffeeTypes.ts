@@ -7,3 +7,7 @@ export type TCoffee = {
   image: string,
   rating: number,
 }
+
+export type TGetCoffeeListRegByParams = {
+  text: string;
+}

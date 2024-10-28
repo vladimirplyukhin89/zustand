@@ -1,4 +1,4 @@
-import { TCoffee } from '../types/coffeeTypes.ts';
+import { TCoffee, TGetCoffeeListRegByParams } from '../types/coffeeTypes.ts';
 import { create, StateCreator } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import axios from 'axios';
@@ -6,21 +6,34 @@ import axios from 'axios';
 const BASE_URL = 'https://purpleschool.ru/coffee-api';
 
 type TCoffeeState = {
-  coffeeList?: TCoffee[]
+  coffeeList?: TCoffee[],
+  controller?: AbortController,
 }
 
 type TCoffeeActions = {
-  getCoffeeList: () => void;
+  getCoffeeList: (params?: TGetCoffeeListRegByParams) => void;
 }
 
-const coffeeSlice: StateCreator<TCoffeeState & TCoffeeActions, [['zustand/devtools', never]], []> = (set) => ({
+const coffeeSlice: StateCreator<TCoffeeState & TCoffeeActions, [['zustand/devtools', never]], []> = (set, get) => ({
   coffeeList: undefined,
-  getCoffeeList: async () => {
+  controller: undefined,
+  getCoffeeList: async (params) => {
+    const { controller } = get();
+    if (controller) {
+      controller.abort()
+    }
+
+    const newController = new AbortController();
+    set({controller: newController})
+    const { signal }  = newController;
+
     try {
-      const { data } = await axios.get<TCoffee[]>(BASE_URL)
+      const { data } = await axios.get<TCoffee[]>(BASE_URL, { params, signal })
       set({ coffeeList: data }, false, 'coffeeStore/getCoffeeList')
     } catch (e) {
-      console.log(e)
+      if (axios.isCancel(e)) {
+        return;
+      }
     }
   },
 })
